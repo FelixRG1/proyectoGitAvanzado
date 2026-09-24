@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-readme:
     runs-on: ubuntu-latest
@@ -16,7 +19,7 @@ jobs:
           ref: main
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Incrementar version y subir con PAT
+      - name: Incrementar version en README y subir
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
