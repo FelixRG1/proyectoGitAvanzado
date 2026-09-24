@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: develop
 
       - name: Actualizar README con la feature
         run: |
@@ -25,6 +26,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout develop
           git add README.md
           git commit -m "docs: registrar feature en README [skip ci]" || echo "Sin cambios"
           git pull --rebase origin develop
