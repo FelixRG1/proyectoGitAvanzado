@@ -1,9 +1,6 @@
 name: CI Pipeline
 
 on:
-  pull_request:
-    branches: [ develop ]
-    types: [ opened, synchronize, reopened ]
   push:
     branches: [ develop ]
   workflow_dispatch:
@@ -12,19 +9,17 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo
+      - name: Descargar codigo con PAT
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: develop
+          token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Configurar Git y sincronizar
+      - name: Configurar Git y actualizar README
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout develop
-          git pull origin develop
-          echo "Añadida feature: ${{ github.head_ref || github.ref_name }}" >> README.md
+          echo "Añadida feature: ${{ github.event.head_commit.message || 'nueva-feature' }}" >> README.md
           git add README.md
           git commit -m "docs: registrar feature en README [skip ci]" || echo "Sin cambios"
           git push origin develop
