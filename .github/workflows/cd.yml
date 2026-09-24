@@ -9,13 +9,15 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo con PAT
+      - name: Descargar codigo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Incrementar version y actualizar README
+      - name: Incrementar version y subir con PAT
+        env:
+          PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -25,7 +27,7 @@ jobs:
           echo "AppVersion-$next_ver ($now)" >> README.md
           git add README.md
           git commit -m "chore: bump version en README [skip ci]" || echo "Sin cambios"
-          git push origin main
+          git push https://x-access-token:${PAT}@github.com/FelixRG1/proyectoGitAvanzado.git main
 
   validate-prod:
     needs: update-readme

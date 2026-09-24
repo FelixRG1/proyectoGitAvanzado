@@ -9,20 +9,22 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo con PAT
+      - name: Descargar codigo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Configurar Git y actualizar README
+      - name: Actualizar README y subir con PAT
+        env:
+          PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           echo "Añadida feature: ${{ github.event.head_commit.message || 'nueva-feature' }}" >> README.md
           git add README.md
           git commit -m "docs: registrar feature en README [skip ci]" || echo "Sin cambios"
-          git push origin develop
+          git push https://x-access-token:${PAT}@github.com/FelixRG1/proyectoGitAvanzado.git develop
 
   validate-dev:
     needs: update-readme
