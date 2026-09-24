@@ -3,9 +3,6 @@ name: CI Pipeline
 on:
   push:
     branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
-    types: [ opened, synchronize, reopened ]
   workflow_dispatch:
 
 permissions:
@@ -24,11 +21,22 @@ jobs:
       - name: Registrar feature en README y subir
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout develop
-          echo "Añadida Feature: ${{ github.head_ref || github.ref_name }}" >> README.md
+
+          # Extraer el nombre de la rama feature del mensaje de merge o usar variable por defecto
+          FEATURE_NAME=$(echo "$COMMIT_MSG" | grep -oE "from [^/]+/(.+)" | sed -E 's/from [^/]+\///' || echo "")
+          if [ -z "$FEATURE_NAME" ]; then
+            FEATURE_NAME="feature/mi-feature"
+          fi
+
+          # Asegurar salto de linea al final antes de concatenar
+          sed -i -e '$a\' README.md
+          echo "Añadida Feature: $FEATURE_NAME" >> README.md
+
           git add README.md
           git commit -m "docs: registrar feature en README [skip ci]" || echo "Sin cambios"
           git push https://x-access-token:${PAT}@github.com/FelixRG1/proyectoGitAvanzado.git develop
