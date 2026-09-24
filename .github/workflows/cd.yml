@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-readme:
     runs-on: ubuntu-latest
@@ -13,14 +16,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Incrementar version y subir con PAT
+      - name: Incrementar version en README y subir
         env:
           PAT: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
           current_ver=$(grep -oE "AppVersion-[0-9]+" README.md | tail -1 | cut -d'-' -f2 || echo "0")
           next_ver=$((current_ver + 1))
           now=$(date "+%Y-%m-%d %H:%M:%S")
@@ -43,4 +48,3 @@ jobs:
             Write-Host "No coinciden PROD_TOKEN"
             exit 1
           }
-EOF
