@@ -1,4 +1,33 @@
-- name: Configurar Git y subir cambios
+name: CD Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Incrementar version en README
+        run: |
+          CURRENT_VER=$(grep -o -E 'AppVersion-[0-9]+' README.md | head -n1 | cut -d'-' -f2)
+          if [ -z "$CURRENT_VER" ]; then
+            CURRENT_VER=0
+          fi
+          NEXT_VER=$((CURRENT_VER + 1))
+          DATE=$(date "+%Y-%m-%d %H:%M:%S")
+          sed -i "s/AppVersion-$CURRENT_VER/AppVersion-$NEXT_VER ($DATE)/" README.md
+
+      - name: Configurar Git y subir cambios
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -6,3 +35,18 @@
           git commit -m "chore: bump version en README [skip ci]" || echo "Sin cambios"
           git pull --rebase origin main
           git push origin main
+
+  validate-prod:
+    needs: update-readme
+    runs-on: self-hosted
+    steps:
+      - name: Comparar PROD_TOKEN con variable local
+        env:
+          TOKEN: ${{ secrets.PROD_TOKEN }}
+        run: |
+          if ($env:TOKEN -eq $env:LOCAL_PROD_TOKEN) {
+            Write-Host "Coinciden PROD_TOKEN"
+          } else {
+            Write-Host "No coinciden PROD_TOKEN"
+            exit 1
+          }
