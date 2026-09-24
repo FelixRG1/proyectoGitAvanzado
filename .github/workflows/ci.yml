@@ -9,7 +9,7 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo
+      - name: Descargar codigo con PAT
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -40,4 +40,3 @@ jobs:
             Write-Host "No coinciden DEV_TOKEN"
             exit 1
           }
-EOF
