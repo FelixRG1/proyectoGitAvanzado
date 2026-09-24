@@ -18,18 +18,15 @@ jobs:
           fetch-depth: 0
           ref: develop
 
-      - name: Actualizar README con la feature
-        run: |
-          echo "Añadida feature: ${{ github.head_ref || github.ref_name }}" >> README.md
-
-      - name: Configurar Git y subir cambios
+      - name: Configurar Git y sincronizar
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout develop
+          git pull origin develop
+          echo "Añadida feature: ${{ github.head_ref || github.ref_name }}" >> README.md
           git add README.md
           git commit -m "docs: registrar feature en README [skip ci]" || echo "Sin cambios"
-          git pull --rebase origin develop
           git push origin develop
 
   validate-dev:
